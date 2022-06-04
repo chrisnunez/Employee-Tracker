@@ -178,8 +178,6 @@ inquirer
     })
  }
       
-
-
 // Add Employee
 const addEmployee = () => {
   let roleArray = [];
@@ -206,13 +204,8 @@ const addEmployee = () => {
     name: 'role',
     message: 'What is the employee\'s role?',
     choices: roleArray
-}
-// {
-//     type: 'input',
-//     name: 'manager',
-//     message: 'Who is the employee\'s manager?',
-//     choices: ""
-// }
+},
+
 ]).then((answer) => {
   let addEmployeeRole = answer.role;
   let addEmployeeId = roleArray.indexOf(addEmployeeRole);
@@ -220,7 +213,7 @@ const addEmployee = () => {
   db.query('INSERT INTO employee SET ?',
       {first_name: answer.first_name,
        last_name: answer.last_name,
-       role_id: addEmployeeId, 
+       role_id: addEmployeeId,
       }, (err, res) => {
         if (err) throw err;
         prompt();
@@ -251,12 +244,12 @@ const updateEmployee = () => {
         choices: updateEmployeeRole
       },
 
-      {
-        type: 'list',
-        name: 'role',
-        message: 'Which role do you want to assign the selected employee',
-        choice: roleArray
-      }
+      // {
+      //   type: 'list',
+      //   name: 'role',
+      //   message: 'Which role do you want to assign the selected employee',
+      //   choice: roleArray
+      // }
       
 
     ])
