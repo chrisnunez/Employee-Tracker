@@ -131,65 +131,62 @@ inquirer
   }
 
   // Add role 
-  const addRole = () => {
-    let departmentArr = [];    
-    let departmentQuery = "SELECT department_name FROM department";
-    db.query(departmentQuery, (err, res) => {
-        if (err) throw err;
-        for (i = 0; i < res.length; i++){
-            departmentArr.push(res[i].department);
-            console.log(res)
-  }
-        let query = "SELECT roles.role_title, roles.role_salary, department.department_name FROM roles INNER JOIN department ON (roles.department_id = department.id";
-        db.query = (query, (err, res) => {
-          if (err) throw err;
-          console.table(res);
-    
-    inquirer.prompt([
-      {
-      type: 'input',
-      name: 'role',
-      message: 'What is the name of the Role?'
-    },
-    {
-      type: 'input',
-      name: 'salary',
-      message: 'What is the salary of the role?'
+ const addRole = () => {
+   let roleArray = [];
+   db.query("SELECT * FROM department", (err, res) => {
+     if (err) throw err;
+     console.log(res)
+     for(let i = 0; i<res.length; i++){
+       roleArray.push(res[i].department_name)
+     }
+   db.query("SELECT roles.role_title, roles.role_salary, department.department_name FROM roles INNER JOIN department ON roles.department_id = department.id", (err, res) => {
+     if (err) throw err;
+     console.table(res)
+     inquirer.prompt([
+       {
+         type: 'input',
+         name: 'role',
+         message: 'What is the name of the role?'
+       },
+       {
+         type: 'input',
+         name: 'salary',
+         message: 'What is the salary of the role?'
+       },
+       {
+         type: 'list',
+         name: 'department',
+         message: 'Which department does the role belong to?',
+         choices: roleArray
+       }
+     ]).then((answer) => {
+       let addDepartment = answer.department;
+       let addEmployeeId = roleArray.indexOf(addDepartment);
+       addDepartment++;
+       db.query("INSERT INTO roles SET ?",
+       {
+        role_title: answer.role,
+        role_salary: answer.salary,
+        department_id: addEmployeeId
+       }, (err, res) => {
+         if (err) throw err;
+         prompt()
+       })
+     })
+   })
 
-    },
-    {
-      type: 'list',
-      name: 'department',
-      message: 'Which department does the role belong to?',
-      choices: departmentArr
-    }
-  ]).then((answer) => {
-    let addDepartment = answer.departmentArr;
-    let addDepartmentId = departmentArr.indexOf(addDepartment);
-    addDepartmentId++;
-    console.log(answer)
-    
-    db.query('INSERT INTO roles SET ?',
-    {role_title: answer.role ,role_salary: answer.salary, department_id: addDepartmentId}, 
-    (err, res) => {
-      console.table(res)
-      prompt();
-  
-      });
-    });            
-  })      
-  })  
-};
-    
+    })
+ }
+      
 
 
 // Add Employee
 const addEmployee = () => {
-  let employeeArray = [];
+  let roleArray = [];
   db.query("SELECT roles.role_title FROM roles;", (err, res) => {
     if (err) throw err;
     for(let i = 0; i < res.length; i++){
-      employeeArray.push(res[i].role_title)
+     roleArray.push(res[i].role_title)
     }
     
   })
@@ -208,7 +205,7 @@ const addEmployee = () => {
     type: 'list',
     name: 'role',
     message: 'What is the employee\'s role?',
-    choices: employeeArray
+    choices: roleArray
 }
 // {
 //     type: 'input',
@@ -218,7 +215,7 @@ const addEmployee = () => {
 // }
 ]).then((answer) => {
   let addEmployeeRole = answer.role;
-  let addEmployeeId = employeeArray.indexOf(addEmployeeRole);
+  let addEmployeeId = roleArray.indexOf(addEmployeeRole);
   addEmployeeId++;
   db.query('INSERT INTO employee SET ?',
       {first_name: answer.first_name,
@@ -233,11 +230,39 @@ const addEmployee = () => {
 
 // update employee
 const updateEmployee = () => {
-  let updateArray = [];
-  db.query("SELECT * FROM employee", (err, res) => {
+  let roleArray = [];
+  db.query("SELECT roles.role_title FROM roles", (err, res) => {
     for(i = 0; i < res.length; i++) {
-      
+     roleArray.push(res[i].role_title)
+      // console.log(res)
     }
+  let updateEmployeeRole = [];
+  db.query("SELECT employee.first_name, employee.last_name, roles.role_title, department.department_name FROM employee INNER JOIN roles ON (employee.role_id = roles.id) INNER JOIN department ON (roles.department_id = department.id) ", (err, res) => {
+    if (err) throw err;
+    console.table(res)
+    for(i = 0; i<res.length; i++){
+      updateEmployeeRole.push(res[i].last_name)
+    
+  } inquirer.prompt([
+      {
+        type: 'list',
+        name: 'name',
+        message: 'Which employee\'s role do you want to update?',
+        choices: updateEmployeeRole
+      },
+
+      {
+        type: 'list',
+        name: 'role',
+        message: 'Which role do you want to assign the selected employee',
+        choice: roleArray
+      }
+      
+
+    ])
   })
+})
 }
+
+
 
